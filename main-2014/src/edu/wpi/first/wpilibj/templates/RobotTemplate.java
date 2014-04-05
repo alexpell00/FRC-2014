@@ -101,6 +101,12 @@ public class RobotTemplate extends SimpleRobot {
     
     //passing
     boolean isGoingToBePass = false;
+    int passReleaseTimer = 0;
+    
+    //calibration
+    boolean isCalibrating = false;
+    boolean wasCalibrationPressed = false;
+    
     
     public void autonomous() {
             autonomousTimer=0;
@@ -167,6 +173,7 @@ public class RobotTemplate extends SimpleRobot {
             //println(String.valueOf(STOP.get()));
             stop=STOP.get();
             
+            
             /*--------Drive--------*/
             if(Right.getRawButton(2)){ //Slow mode
                 speed=.4;
@@ -213,7 +220,7 @@ public class RobotTemplate extends SimpleRobot {
                 }else{
                     winchMoreTimer += 1;
                 }
-                
+
             }if(release&&!winchUp){//reverses for _ seconds
                 boolean isPass = (timerI>5 && isGoingToBePass);
                 if(timerI<30 && !isPass){
@@ -229,7 +236,7 @@ public class RobotTemplate extends SimpleRobot {
             }
             /*--------Trigger--------*/
             trigger();
-           
+
            /*---------Intake--------*/
            if(Left.getRawButton(4)||secondary.getRawButton(4)){
                leftLifter.set(-.6);
@@ -241,7 +248,7 @@ public class RobotTemplate extends SimpleRobot {
                leftLifter.set(0);
                rightLifter.set(0);
            }
-           
+
            /*---------Intake Raise/Lower--------*/
            if(secondary.getRawButton(7)){ //raise
                if (lifterCnt < 3){
@@ -269,14 +276,11 @@ public class RobotTemplate extends SimpleRobot {
                lifterCnt = 0;
                intakeAngle.set(Relay.Value.kOff);
            }
+
+
+           println("");
            
-           if (isGoingToBePass){
-               println("Pass: true");
-           }else{
-               println("Pass: false");
-           }
-           
-           
+            
             Timer.delay(.01);
             DriverStationLCD.getInstance().updateLCD(); //updates the screen after all of the logs have bheen printed
             
@@ -292,7 +296,43 @@ public class RobotTemplate extends SimpleRobot {
     }
     
     public void trigger(){
+        if (passReleaseTimer > 0){
+            passReleaseTimer += 1;
+            jag5.set(-.7);
+            jag6.set(-.7);
+            if (passReleaseTimer > 10){
+                passReleaseTimer = 0;
+                isGoingToBePass = false;
+                triggerGo=true;
+                triggerForward=true;
+            }else{
+                return;
+            }
+        }
+        if (passReleaseTimer < 0){
+            passReleaseTimer -= 1;
+            jag5.set(.7);
+            jag6.set(.7);
+            if (passReleaseTimer < -10){
+                passReleaseTimer = 0;
+                isGoingToBePass = true;
+                triggerGo=true;
+                triggerForward=true;
+            }else{
+                return;
+            }
+        }
+        
+        
+        
         if(Left.getRawButton(1) || Right.getRawButton(1)){
+            if (Right.getRawButton(1) && isGoingToBePass){
+                passReleaseTimer = 1;
+                return;
+            }else if(Left.getRawButton(1) && !isGoingToBePass){
+                passReleaseTimer = -1;
+                return;
+            }
             triggerGo=true;
             triggerForward=true;
         }else{
@@ -344,9 +384,10 @@ public class RobotTemplate extends SimpleRobot {
            }
     }
     public void autoTrigger(){
+        int triggerTimer = 40;
         if(triggerGo){
             if(triggerForward){
-                if(timerII<30){
+                if(timerII<triggerTimer){
                     triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
                     triggerMotor.setDirection(Relay.Direction.kForward);
                 }else{
@@ -360,7 +401,7 @@ public class RobotTemplate extends SimpleRobot {
 //                    }
                 timerII+=1;
             }else if(triggerBackward){
-                if(timerII<30){
+                if(timerII<triggerTimer){
                     triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
                     triggerMotor.setDirection(Relay.Direction.kReverse);
                 }else{
@@ -376,6 +417,19 @@ public class RobotTemplate extends SimpleRobot {
                 reset=true;
             }
         }
+    }
+    private void calibration() {
+       println("Calibrating");
+       
+       if (Right.getRawButton(11)){
+           triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
+           triggerMotor.setDirection(Relay.Direction.kForward);
+       }else if(Right.getRawButton(10)){
+           triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
+           triggerMotor.setDirection(Relay.Direction.kReverse);
+       }else{
+           triggerMotor.set(Relay.Value.kOff);//Hayden fixed the code
+       }
     }
 }
     
