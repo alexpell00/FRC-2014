@@ -222,7 +222,7 @@ public class RobotTemplate extends SimpleRobot {
                 }
 
             }if(release&&!winchUp){//reverses for _ seconds
-                boolean isPass = (timerI>5 && isGoingToBePass);
+                boolean isPass = (timerI>-1 && isGoingToBePass);
                 if(timerI<30 && !isPass){
                     jag5.set(-.7);
                     jag6.set(-.7);
@@ -313,7 +313,7 @@ public class RobotTemplate extends SimpleRobot {
             passReleaseTimer -= 1;
             jag5.set(.7);
             jag6.set(.7);
-            if (passReleaseTimer < -10){
+            if (passReleaseTimer < -15){
                 passReleaseTimer = 0;
                 isGoingToBePass = true;
                 triggerGo=true;
@@ -340,7 +340,7 @@ public class RobotTemplate extends SimpleRobot {
         }
         if(triggerGo){
             if(triggerForward){
-                if(timerII<30){
+                if(timerII<40){
                     triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
                     triggerMotor.setDirection(Relay.Direction.kForward);
                 }
@@ -355,7 +355,7 @@ public class RobotTemplate extends SimpleRobot {
 //                    }
                 timerII+=1;
             }else if(triggerBackward){
-                if(timerII<30){
+                if(timerII<40){
                     triggerMotor.set(Relay.Value.kOn);//Hayden fixed the code
                     triggerMotor.setDirection(Relay.Direction.kReverse);
                 }else{
@@ -384,7 +384,7 @@ public class RobotTemplate extends SimpleRobot {
            }
     }
     public void autoTrigger(){
-        int triggerTimer = 40;
+        int triggerTimer = 50;
         if(triggerGo){
             if(triggerForward){
                 if(timerII<triggerTimer){
